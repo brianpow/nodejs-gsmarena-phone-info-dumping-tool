@@ -1,0 +1,30 @@
+{
+  "name": "gsmarena.com-phone-info-dumping-tool",
+  "version": "1.0.0",
+  "description": "A script to dump the phone information from gsmarena.com",
+  "main": "gsmarena.js",
+  "dependencies": {
+    "array-flatten": "^2.1.0",
+    "array-to-csv": "git+https://github.com/jonathanong/array-to-csv",
+    "bluebird": "^3.4.7",
+    "cheerio": "^0.22.0",
+    "commander": "^2.9.0",
+    "flatten": "^1.0.2",
+    "requestretry": "^1.12.0",
+    "util": "^0.10.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Brian Pow <brianpow@gmail.com>",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brianpow/nodejs-gsmarena-phone-info-dumping-tool.git"
+  },
+  "bugs": {
+    "url": "https://github.com/brianpow/nodejs-gsmarena-phone-info-dumping-tool/issues"
+  },
+  "homepage": "https://github.com/brianpow/nodejs-gsmarena-phone-info-dumping-tool#readme"
+}
