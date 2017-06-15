@@ -31,7 +31,7 @@ function save(data) {
 
     let date = new Date().toISOString().slice(0, 19).replace(/:/g, "-").replace(/T/g, " ");
     let filename = "gsm " + date + ".csv"
-    let content = toCSV([headersIndex]) + "\n" + flattened_data.join("\n")
+    let content = toCSV([headersIndex],program.separator,true) + "\n" + flattened_data.join("\n")
     fs.writeFileAsync(filename, content).then(function() {
         console.log(util.format("%d records saved to %s!", flattened_data.length, filename))
     }).catch(errorHandler)
@@ -58,7 +58,7 @@ function parse(data) {
             row[headersIndex.indexOf(header)] = value;
         })
     })
-    return toCSV([row], ",", true)
+    return toCSV([row], program.separator, true)
 }
 
 var getProducts = function(url, stopFindPages, data) {
@@ -103,7 +103,7 @@ function main(min, max) {
         let $ = cheerio.load(res)
         let $a = $("div.st-text td > a")
         console.log(util.format("%s makers found!", $a.length))
-        console.log("Begins to parse and download product lists and infroamtion, it can take very long time, be patient.")
+        console.log("Begins to parse and download product lists and information, it can take very long time, be patient.")
         $a.each(function(i) {
             min = (typeof min != "undefined") ? min : 0
             max = (typeof max != "undefined") ? max : 99999
@@ -137,9 +137,10 @@ function banner() {
 }
 
 program
-    .version('1.0.0')
+    .version('1.0.1')
     .option('-b, --brand <keywords or regular expression>', 'Download only phone info with brands matching <keywords> or <regular expression>', "")
     .option('-d, --model <keywords or regular expression>', 'Download only phone info with models matching <keywords> or <regular expression>', "")
+    .option('-s, --separator <separator>', 'separator of saved file [default: <TAB>]', "\t")
     .option('-m, --max-connection <max connection>', 'Maximum simultaneous HTTP connections, default is 4', parseInt, 2)
     .option('-t, --timeout <time in ms>', 'Timeout for each HTTP request, default is 60000ms', parseInt, 60000)
     .option('-r, --retry <count>', 'Retry if HTTP connections failed, default is 10', parseInt, 10)
