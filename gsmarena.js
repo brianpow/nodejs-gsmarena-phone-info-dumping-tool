@@ -31,7 +31,7 @@ function save(data) {
 
     let date = new Date().toISOString().slice(0, 19).replace(/:/g, "-").replace(/T/g, " ");
     let filename = "gsm " + date + ".csv"
-    let content = toCSV([headersIndex],program.separator,true) + "\n" + flattened_data.join("\n")
+    let content = toCSV([headersIndex], program.separator) + "\n" + flattened_data.join("\n")
     fs.writeFileAsync(filename, content).then(function() {
         console.log(util.format("%d records saved to %s!", flattened_data.length, filename))
     }).catch(errorHandler)
@@ -58,7 +58,7 @@ function parse(data) {
             row[headersIndex.indexOf(header)] = value;
         })
     })
-    return toCSV([row], program.separator, true)
+    return toCSV([row], program.separator)
 }
 
 var getProducts = function(url, stopFindPages, data) {
@@ -102,8 +102,11 @@ function main(min, max) {
     }).then(function(res) {
         let $ = cheerio.load(res)
         let $a = $("div.st-text td > a")
-        console.log(util.format("%s makers found!", $a.length))
-        console.log("Begins to parse and download product lists and information, it can take very long time, be patient.")
+        let totalPhones = $a.map(function() {
+            return $("span", this).text().split(" ")[0]
+        }).get().reduce((a, b) => parseInt(a) + parseInt(b), 0)
+        console.log(util.format("%d makers and %d phones found before filter.", $a.length, totalPhones))
+        totalPhones = 0
         $a.each(function(i) {
             min = (typeof min != "undefined") ? min : 0
             max = (typeof max != "undefined") ? max : 99999
@@ -114,22 +117,27 @@ function main(min, max) {
                 if (program.verbose > 1)
                     console.log(util.format("Found makers url: %s", url))
 
-                if (!program.brand || (program.brand && (typeof program.brand == "object" && program.brand.test(brand) || brand.indexOf(program.brand) != -1)))
+                if (!program.brand || (program.brand && (typeof program.brand == "object" && program.brand.test(brand) || brand.indexOf(program.brand) != -1))) {
                     deferreds.push(
                         baseRequest({
                             url: url
                         }).then(getProducts.bind(null, url, false)).catch(errorHandler)
                     )
+                    totalPhones += parseInt($("span", this).text().split(" ")[0])
+                }
             }
         })
-
+        if (program.brand)
+            console.log(util.format("%d makers and %d phones left after filter!", deferreds.length, totalPhones))
+        console.log("Begins to parse and download product lists and information, it can take very long time, be patient.")
         return Promise.all(deferreds).then(save, save)
     }).catch(errorHandler)
 }
 
 function errorHandler(e) {
     console.error(e);
-    process.exit(1)
+    if (program.exit)
+        process.exit(1)
 }
 
 function banner() {
@@ -137,15 +145,16 @@ function banner() {
 }
 
 program
-    .version('1.0.1')
+    .version('1.0.2')
     .option('-b, --brand <keywords or regular expression>', 'Download only phone info with brands matching <keywords> or <regular expression>', "")
     .option('-d, --model <keywords or regular expression>', 'Download only phone info with models matching <keywords> or <regular expression>', "")
     .option('-s, --separator <separator>', 'separator of saved file [default: <TAB>]', "\t")
-    .option('-m, --max-connection <max connection>', 'Maximum simultaneous HTTP connections, default is 4', parseInt, 2)
+    .option('-m, --max-connection <max connection>', 'Maximum simultaneous HTTP connections, default is 2', parseInt, 2)
     .option('-t, --timeout <time in ms>', 'Timeout for each HTTP request, default is 60000ms', parseInt, 60000)
     .option('-r, --retry <count>', 'Retry if HTTP connections failed, default is 10', parseInt, 10)
     .option('-R, --retry-delay <time in ms>', 'Retry dealy if HTTP connections failed, default is 60000ms', parseInt, 60000)
     .option('-a, --user-agent <user agent>', 'User agent in HTTP request header, default is "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1"', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1')
+    .option('-e, --exit', 'Exit on error, don\'t continue')
     .option('-v, --verbose', 'Be more verbose (max -vvv)', increaseVerbosity, 0)
     .parse(process.argv)
 
