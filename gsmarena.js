@@ -37,11 +37,11 @@ function save(data) {
 }
 
 
-function parse(data) {
+function parse(url, data) {
     let row = []
     let jq = cheerio.load(data)
     if (program.verbose > 0)
-        console.log(util.format("Parsing %s...", jq("h1.specs-phone-name-title").text()))
+        console.log(util.format("Parsing %s downloaded from %s...", jq("h1.specs-phone-name-title").text(),url))
 
     row[0] = jq("h1.specs-phone-name-title").text()
     jq("#specs-list table").each(function() {
@@ -89,7 +89,7 @@ var getProducts = function(url, stopFindPages, data) {
         if (!program.model || (program.model && (typeof program.model == "object" && program.model.test(model) || model.toLowerCase().indexOf(program.model.toLowerCase()) != -1)))
             deferreds.push(baseRequest({
                 url: url
-            }).then(parse).catch(errorHandler))
+            }).then(parse.bind(null,url)).catch(errorHandler))
     })
     return Promise.all(deferreds);
 }
@@ -118,7 +118,7 @@ function main(min, max) {
 
                 let brand = this.children[0].data
                 if (program.verbose > 1)
-                    console.log(util.format("Found makers url: %s", url))
+                    console.log(util.format("Found maker %s with url: %s", brand, url))
                 if (program.list)
                     fs.appendFileSync(util.format("makers %s.txt",date), [brand,url].join("\t") + "\n")
 
