@@ -30,7 +30,7 @@ function save(data) {
     let flattened_data = flatten([].slice.call(arguments))
 
     let filename = "gsm " + date + ".csv"
-    let content = toCSV([headersIndex], program.separator) + "\n" + flattened_data.join("\n")
+    let content = toCSV([headersIndex], program.separator) + "\n" + flattened_data.filter((value)=>value !== "").join("\n")
     fs.writeFileAsync(filename, content).then(function() {
         console.log(util.format("%d records saved to %s!", flattened_data.length, filename))
     }).catch(errorHandler)
