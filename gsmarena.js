@@ -29,7 +29,6 @@ function save(data) {
 
     let flattened_data = flatten([].slice.call(arguments))
 
-    let date = new Date().toISOString().slice(0, 19).replace(/:/g, "-").replace(/T/g, " ");
     let filename = "gsm " + date + ".csv"
     let content = toCSV([headersIndex], program.separator) + "\n" + flattened_data.join("\n")
     fs.writeFileAsync(filename, content).then(function() {
@@ -94,6 +93,7 @@ var getProducts = function(url, stopFindPages, data) {
 
 headersIndex = ["Brand and Model"]
 var domain = "http://www.gsmarena.com/"
+var date = new Date().toISOString().slice(0, 19).replace(/:/g, "-").replace(/T/g, " ");
 
 function main(min, max) {
     let deferreds = []
