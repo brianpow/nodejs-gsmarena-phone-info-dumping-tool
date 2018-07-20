@@ -84,7 +84,7 @@ var getProducts = function(url, stopFindPages, data) {
             console.log(util.format("Products url %s found, pending to be downloaded.", url))
         let model = jq("span", this).text()
 
-        if (!program.model || (program.model && (typeof program.model == "object" && program.model.test(model) || model.indexOf(program.model) != -1)))
+        if (!program.model || (program.model && (typeof program.model == "object" && program.model.test(model) || model.toLowerCase().indexOf(program.model.toLowerCase()) != -1)))
             deferreds.push(baseRequest({
                 url: url
             }).then(parse).catch(errorHandler))
@@ -117,7 +117,7 @@ function main(min, max) {
                 if (program.verbose > 1)
                     console.log(util.format("Found makers url: %s", url))
 
-                if (!program.brand || (program.brand && (typeof program.brand == "object" && program.brand.test(brand) || brand.indexOf(program.brand) != -1))) {
+                if (!program.brand || (program.brand && (typeof program.brand == "object" && program.brand.test(brand) || brand.toLowerCase().indexOf(program.brand.toLowerCase()) != -1))) {
                     deferreds.push(
                         baseRequest({
                             url: url
