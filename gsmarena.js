@@ -81,6 +81,9 @@ var getProducts = function(url, stopFindPages, data) {
         let url = domain + this.attribs['href']
         if (program.verbose > 1)
             console.log(util.format("Products url %s found, pending to be downloaded.", url))
+		if (program.list)
+				fs.appendFileSync(util.format("models %s.txt",date), url + "\n")
+        
         let model = jq("span", this).text()
 
         if (!program.model || (program.model && (typeof program.model == "object" && program.model.test(model) || model.toLowerCase().indexOf(program.model.toLowerCase()) != -1)))
@@ -116,6 +119,8 @@ function main(min, max) {
                 let brand = this.children[0].data
                 if (program.verbose > 1)
                     console.log(util.format("Found makers url: %s", url))
+                if (program.list)
+                    fs.appendFileSync(util.format("makers %s.txt",date), [brand,url].join("\t") + "\n")
 
                 if (!program.brand || (program.brand && (typeof program.brand == "object" && program.brand.test(brand) || brand.toLowerCase().indexOf(program.brand.toLowerCase()) != -1))) {
                     deferreds.push(
@@ -155,6 +160,7 @@ program
     .option('-R, --retry-delay <time in ms>', 'Retry dealy if HTTP connections failed, default is 60000ms', parseInt, 60000)
     .option('-a, --user-agent <user agent>', 'User agent in HTTP request header, default is "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1"', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1')
     .option('-e, --exit', 'Exit on error, don\'t continue')
+    .option('-l, --list', 'Save url lists as markers <Date>.txt and models <Date>.txt',"")
     .option('-v, --verbose', 'Be more verbose (max -vvv)', increaseVerbosity, 0)
     .parse(process.argv)
 
